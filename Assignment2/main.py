@@ -2,11 +2,15 @@ import csv
 import tkinter as tk
 from tkinter import ttk
 
+COLORS = ["red", "green", "blue"]
+SHAPES = ['circle', 'square', 'plus']
+
 
 class DataPoint:
-    def __init__(self, x, y):
+    def __init__(self, x, y, category):
         self.x = x
         self.y = y
+        self.category = category
 
 # Read csv files
 
@@ -14,12 +18,9 @@ class DataPoint:
 def read_data(file_path):
     with open(file_path, 'r') as file:
         csvreader = csv.reader(file)
-        data = [row for row in csvreader]
+        data = [DataPoint(float(row[0]), float(row[1]), row[2])
+                for row in csvreader]
     return data
-
-
-data1 = read_data("data1.csv")
-data2 = read_data("data2.csv")
 
 
 def convert_to_float(value):
@@ -29,12 +30,8 @@ def convert_to_float(value):
         return None
 
 
-# add data from csv files into a list
-data = [DataPoint(convert_to_float(row[0]), convert_to_float(row[1]))
-        for row in data1 + data2]
-
-print()
 '''
+
 print("File 1:")
 for row in data1:
     print(row)
@@ -55,20 +52,24 @@ class ScatterPlot:
 
     # Draw the x- and y-axis and the ticks and tick values.
     def draw_axes_ticks(self):
+        self.draw_axis_lines()
+        self.draw_ticks()
+
+    def draw_axis_lines(self):
+        # Draw x-axis
+        self.canvas.create_line(50, 400, 750, 400, fill="black", width=5)
+        self.canvas.create_text(750, 350, text="X-axis")
+
+        # Draw y-axis
+        self.canvas.create_line(400, 750, 400, 50, fill="black", width=5)
+        self.canvas.create_text(350, 20, text="Y-axis")
+
+    def draw_ticks(self):
         x_range, y_range = self.calculate_axis_ranges()
 
         # Convert x_range and y_range to integers
         x_range = int(x_range)
         y_range = int(y_range)
-
-        # Draw x-axis
-        self.canvas.create_line(50, 400, 750, 400, fill="black", width=5)
-        self.canvas.create_text(700, 350, text="X-axis")
-
-        # Draw y-axis
-        self.canvas.create_line(400, 750, 400, 50, fill="black", width=5)
-        self.canvas.create_text(350, 80, text="Y-axis")
-
         # Draw ticks and tick values on x-axis
         for i in range(-x_range, x_range+1, round(x_range*2/11)):
             x = round(400 + i*(350/x_range))
@@ -82,45 +83,110 @@ class ScatterPlot:
             self.canvas.create_text(425, y, text=str(i))
 
     def calculate_axis_ranges(self):
-        # Calculate x and y axis ranges based on data
-        x_values = [point.x for point in self.data]
-        y_values = [point.y for point in self.data]
+        x_values = [point.x for point in self.data if point.x is not None]
+        y_values = [point.y for point in self.data if point.y is not None]
 
-        x_range = max(abs(min(x_values)), abs(max(x_values)))
-        y_range = max(abs(min(y_values)), abs(max(y_values)))
+        x_min = min(map(float, x_values), default=0)
+        x_max = max(map(float, x_values), default=0)
+        y_min = min(map(float, y_values), default=0)
+        y_max = max(map(float, y_values), default=0)
+
+        x_range = max(abs(x_min), abs(x_max))
+        y_range = max(abs(y_min), abs(y_max))
 
         return x_range, y_range
 
-    def calculate_tick_interval(self, axis_range):
-        # Calculate tick interval based on axis range
-        return round(axis_range * 2 / 11)
-    '''
-    def convert_to_canvas_coordinates(self, value, axis_range):
-        # Convert data value to canvas coordinates
-        return round(400 - value * (350 / axis_range))
-    '''
+     # Draw legend
 
+    def draw_legend(self, types):
+        for i in range(len(types)):
+            shape = SHAPES[i] if i < len(SHAPES) else 'unknown'
+            tk.Label(self.root, text=f"{shape} : {types[i]}").place(
+                relx=0.95, rely=0.1 + 0.05 * i, anchor="ne")
+    # Draw a data point with specified color, shape, and category
 
-# Example usage
-root = tk.Tk()
-root.title("Scatter Plot")
-scatter_plot = ScatterPlot(root, data)  # Assuming 'data' is defined
-scatter_plot.draw_axes_ticks()
-root.mainloop()
-
-'''
-        # Draw legend
-    def draw_legend(self):
-
-        # Draw a data point with specified color, shape, and category
     def draw_data_points(self, x, y, color, shape, category):
+        if shape == 'circle':
+            element = self.canvas.create_oval(
+                x - 5, y - 5, x + 5, y + 5, fill=color, tags=["point", f"{category}"])
+        elif shape == 'square':
+            element = self.canvas.create_rectangle(
+                x - 5, y - 5, x + 5, y + 5, fill=color, tags=["point", f"{category}"])
+        elif shape == 'plus':
+            element = self.canvas.create_text(x, y, text="+", fill=color, font=("Purisa", 30),
+                                              tags=["point", f"{category}"])
+        else:
+            element = None
 
-        # Display the categorical information of the data points by using different shapes to represent the points.
+        return element
+
+    # Display the categorical information of the data points by using different shapes to represent the points.
     def display_categorical_info(self):
+        types = set(map(lambda point: point.category, self.data))
+        types = list(types)
 
-        # Display the data points correctly for the axes.
+        for point in self.data:
+            x = point.x
+            y = point.y
+            color = 'black'  # default color
+            shape = 'circle'  # default shape
+
+            if point.category in types:
+                color = COLORS[types.index(point.category)]
+                shape = SHAPES[types.index(point.category)]
+
+            self.draw_data_point(x, y, color, shape, point.category)
+
+    # Display the data points correctly for the axes.
     def display_data_points(self):
+        x_range, y_range = self.calculate_axis_ranges()
+        types = set(map(lambda point: point.category, self.data))
+        types = list(types)
 
-        # Set the value range automatically based on the data values present in the data set.
-    def set_value_range(self):
-'''
+        for point in self.data:
+            x = round(400 + point.x * (350 / x_range))
+            y = round(400 - point.y * (350 / y_range))
+            color = 'black'  # default color
+            shape = 'circle'  # default shape
+
+            if point.category in types:
+                color = COLORS[types.index(point.category)]
+                shape = SHAPES[types.index(point.category)]
+
+            self.draw_data_point(x, y, color, shape, point.category)
+
+    # Display the data points correctly for the axes.
+    def display_data_points(self):
+        x_range, y_range = self.calculate_axis_ranges()
+        types = set(map(lambda point: point.category, self.data))
+        types = list(types)
+
+        for point in self.data:
+            x = round(400 + point.x * (350 / x_range))
+            y = round(400 - point.y * (350 / y_range))
+            color = 'black'  # default color
+            shape = 'circle'  # default shape
+
+            if point.category in types:
+                color = COLORS[types.index(point.category)]
+                shape = SHAPES[types.index(point.category)]
+
+            self.draw_data_points(x, y, color, shape, point.category)
+
+
+if __name__ == "__main__":
+    file_path = input(
+        "Enter the CSV file path (e.g., data1.csv or data2.csv): ")
+    data = read_data(file_path)
+
+    root = tk.Tk()
+    root.title("Scatter Plot")
+
+    scatter_plot = ScatterPlot(root, data)
+    scatter_plot.draw_axes_ticks()
+
+    types = list(set([point.category for point in data]))
+    scatter_plot.draw_legend(types)
+    scatter_plot.display_data_points()
+
+    root.mainloop()
