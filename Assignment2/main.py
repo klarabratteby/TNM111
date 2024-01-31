@@ -1,8 +1,9 @@
 import csv
 import tkinter as tk
 from tkinter import ttk
+import math
 
-COLORS = ["red", "green", "blue"]
+COLORS = ["red", "pink", "green"]
 SHAPES = ['circle', 'square', 'plus']
 
 
@@ -57,12 +58,12 @@ class ScatterPlot:
 
     def draw_axis_lines(self):
         # Draw x-axis
-        self.canvas.create_line(50, 400, 750, 400, fill="black", width=5)
+        self.canvas.create_line(50, 400, 750, 400, fill="black", width=2)
         self.canvas.create_text(750, 350, text="X-axis")
 
         # Draw y-axis
-        self.canvas.create_line(400, 750, 400, 50, fill="black", width=5)
-        self.canvas.create_text(350, 20, text="Y-axis")
+        self.canvas.create_line(400, 750, 400, 50, fill="black", width=2)
+        self.canvas.create_text(350, 50, text="Y-axis")
 
     def draw_ticks(self):
         x_range, y_range = self.calculate_axis_ranges()
@@ -176,7 +177,7 @@ class ScatterPlot:
 
 if __name__ == "__main__":
     file_path = input(
-        "Enter the CSV file path (e.g., data1.csv or data2.csv): ")
+        "Enter the CSV file path: ")
     data = read_data(file_path)
 
     root = tk.Tk()
