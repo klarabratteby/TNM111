@@ -2,6 +2,7 @@ import csv
 import tkinter as tk
 from tkinter import ttk
 import math
+import numpy as np
 
 COLORS = ["red", "pink", "green"]
 SHAPES = ['circle', 'square', 'star']
@@ -12,6 +13,8 @@ class DataPoint:
         self.x = x
         self.y = y
         self.category = category
+    def __str__(self):
+        return f'{self.x}i{self.y:+}j'
 
 # Read csv files
 '''
@@ -37,16 +40,18 @@ def convert_to_float(value):
 
 
 class ScatterPlot:
+    
     # Initializer
     def __init__(self, root, data):
         self.root = root  # main window
         self.data = data  # data
         self.canvas = tk.Canvas(root, width=800, height=800)  # Tkinter widget
         self.canvas.pack()  # packs the canvas within the main window
-        self.selected_point = None
-        self.new_origin = False
-        self.neighbor_highlighted = False
+        self.translated = False
+        self.highlighted = False
+        self.latest_move = [0,0]
         self.closest_points = []
+        self.x_range, self.y_range = self.calculate_axis_ranges()  # Add x_range and y_range as attributes
 
     # Draw the x- and y-axis and the ticks and tick values.
     def draw_axes_ticks(self):
@@ -115,6 +120,9 @@ class ScatterPlot:
                                               tags=["point", f"{shape}"])
         else:
             element = None
+        
+        self.canvas.tag_bind(element, '<Button-1>', self.object_left_click_event) # Left click
+        self.canvas.tag_bind(element, '<Button-3>', self.object_right_click_event) # Right click
 
         return element
 
@@ -133,80 +141,92 @@ class ScatterPlot:
             if point.category in types:
                 color = COLORS[types.index(point.category)]
                 shape = SHAPES[types.index(point.category)]
+            
+            point_tag = f"point_{point.category}"  # Use a unique tag for each point
+            self.draw_data_points(x, y, color, shape, point_tag)
+          
+    def object_left_click_event(self, event):
+        
+        points = self.canvas.find_withtag("point")
+   
+        # Different actions depending on already translated
+        if self.translated:
+            self.translated = False
 
-            self.draw_data_points(x, y, color, shape, point.category)
-            self.canvas.tag_bind(point.category, '<Button-1>', lambda event, tag=point.category: self.left_click_event(event, tag))
-            self.canvas.tag_bind(point.category, '<Button-3>', lambda event, tag=point.category: self.right_click_event(event, tag))
-
-    def left_click_event(self, event, category):
-        if not self.new_origin:
-            self.new_origin = True
-            self.selected_point = category
-
-            # Get x_range and y_range directly from the method
-            x_range, y_range = self.calculate_axis_ranges()
-
-            # Mark the selected point
-            element = self.canvas.find_withtag(self.selected_point)[0]
-            self.canvas.itemconfig(element, outline="black", width=2)
-
-            # Change colors based on quadrants
-            for point in self.data:
-                x = round(400 + point.x * (350 / x_range))
-                y = round(400 - point.y * (350 / y_range))
-
-                if point.category != self.selected_point:
-                    if x > event.x and y > event.y:
-                        self.canvas.itemconfig(point.category, fill="red")
-                    elif x > event.x and y < event.y:
-                        self.canvas.itemconfig(point.category, fill="blue")
-                    elif x < event.x and y < event.y:
-                        self.canvas.itemconfig(point.category, fill="black")
-                    elif x < event.x and y > event.y:
-                        self.canvas.itemconfig(point.category, fill="orange")
-
+            # Move all points back to original
+            for i in points:
+                self.canvas.move(i, -self.latest_move[0], -self.latest_move[1])
+                # Switch color back to ordinary
+                tags = self.canvas.gettags(i)
+                default_color = COLORS[0]  
+                colorTag = tags[2] if len(tags) >= 3 else default_color
+                print(f"Setting color to {colorTag}")
+                self.canvas.itemconfig(i, fill=colorTag)
+            
         else:
-            self.new_origin = False
+            self.translated = True
+            # Move points
+            move_x = 400-event.x
+            move_y = 400-event.y
+            self.latest_move = [move_x, move_y]           
+                    
+            # Loop through all points with tag "point"
+            for i in range(len(points)):
+                self.canvas.move(points[i], move_x, move_y)
+                
+                
+                p = self.canvas.coords(points[i])
+             
+                # Change color
+            
+                if p[0] > 400 and p[1] > 400:
+                    colorTag = "red"
+                elif p[0] > 400 and p[1] < 400:
+                    colorTag = "blue"
+                elif p[0] < 400 and p[1] < 400:
+                    colorTag = "black"
+                elif p[0] < 400 and p[1] > 400:
+                    colorTag = "orange"
 
-             # Unmark the selected point
-            element = self.canvas.find_withtag(self.selected_point)[0]
-            self.canvas.itemconfig(element, outline="")
+                print(f"Setting color to {colorTag}")
+                self.canvas.itemconfig(points[i], fill=colorTag)
 
-             # Reset colors
-            for point in self.data:
-                x = round(400 + point.x * (350 / x_range))
-                y = round(400 - point.y * (350 / y_range))
-    
-    def right_click_event(self, event, category):
-        if not self.neighbor_highlighted:
-            self.neighbor_highlighted = True
-            self.selected_point = category
+            current = event.widget.find_withtag("current")[0]
+            self.canvas.itemconfig(current, fill='yellow')       
 
-            # Find the coordinates of the selected point
-            selected_point_coords = self.canvas.coords(self.selected_point)
-
-            # Calculate distances to all points
-            distances = [(point, self.calculate_distance(selected_point_coords, self.canvas.coords(point)))
-                         for point in self.canvas.find_withtag("point")]
-
-            # Sort distances and get the five closest points
-            distances.sort(key=lambda x: x[1])
-            closest_points = distances[:5]
-
-            # Highlight the closest points
-            for point, _ in closest_points:
-                self.canvas.itemconfig(point, outline="yellow", width=2)
-
+    def object_right_click_event(self, event):
+        if self.highlighted: 
+            self.highlighted = False
+            for p in self.closest_points:
+                colorTag = self.canvas.gettags(p)[2]
+                self.canvas.itemconfig(p, fill=colorTag)
         else:
-            self.neighbor_highlighted = False
+            self.highlighted = True
+            points = self.canvas.find_withtag("point")
 
-            # Unhighlight the closest points
-            for point, _ in self.closest_points:
-                self.canvas.itemconfig(point, outline="", width=1)
+            # Get tags of current element
+            current = event.widget.find_withtag("current")[0]
+        
+            active = self.canvas.coords(current)            
 
-    def calculate_distance(self, point1, point2):
-        return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
+            dist = []
+            for point in points:
+                co = self.canvas.coords(point)
+                d = math.sqrt(pow((active[0]-co[0]),2)+pow((active[1]-co[1]),2))  
+                            
+                if d > 0:                 
+                    dist.append(d)
+                   
+            closest_points_indices = np.argpartition(dist, 5)[:5] 
+                
+            # Get 5 smallest distances               
+            self.closest_points = []
 
+            for i in closest_points_indices:            
+                self.canvas.itemconfig(points[i], fill='yellow')                    
+                self.closest_points.append(points[i]) 
+
+       
 if __name__ == "__main__":
     file_path = input(
         "Enter the CSV file path: ")
