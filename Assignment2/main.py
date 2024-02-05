@@ -4,15 +4,19 @@ from tkinter import ttk
 import math
 import numpy as np
 
+# List for colors
 COLORS = ["red", "pink", "green"]
+# List for shapes
 SHAPES = ['circle', 'square', 'star']
 
+# Class to represent a data point
 class DataPoint:
     def __init__(self, x, y, category):
         self.x = x
         self.y = y
         self.category = category
-    
+
+# Read data from csv-file
 def read_data(file_path):
     with open(file_path, 'r') as file:
         csvreader = csv.reader(file)
@@ -20,6 +24,7 @@ def read_data(file_path):
                 for row in csvreader]
     return data
 
+# Class for creating a Scatter Plot
 class ScatterPlot:
     
     # Initializer
@@ -33,7 +38,7 @@ class ScatterPlot:
         self.new_grid = [0,0] # New grid
         self.closest_points = [] # For highlighting
         self.original_positions = {}  # Original positions + color for each point
-        self.x_range, self.y_range = self.calculate_axis_ranges()  # Add x_range and y_range as attributes
+        #self.x_range, self.y_range = self.calculate_axis_ranges()  # Add x_range and y_range as attributes
 
     # Draw the x- and y-axis and the ticks and tick values.
     def draw_axes_ticks(self):
@@ -55,6 +60,7 @@ class ScatterPlot:
         # Convert x_range and y_range to integers
         x_range = int(x_range)
         y_range = int(y_range)
+        
         # Draw ticks and tick values on x-axis
         for i in range(-x_range, x_range+1, round(x_range*2/11)):
             x = round(400 + i*(350/x_range))
@@ -81,7 +87,7 @@ class ScatterPlot:
 
         return x_range, y_range
 
-     # Draw legend
+    # Draw legend
     def draw_legend(self, types):
         for i in range(len(types)):
             shape = SHAPES[i] if i < len(SHAPES) else 'unknown'
@@ -113,26 +119,26 @@ class ScatterPlot:
         types = set(map(lambda point: point.category, self.data))
         types = list(types)
 
+        # Calculate coordinates based on data point and axis ranges
         for point in self.data:
             x = round(400 + point.x * (350 / x_range))
             y = round(400 - point.y * (350 / y_range))
-            color = 'black'  # default color
-            shape = 'circle'  # default shape
 
+            # Get the color and shape based on the category
             if point.category in types:
                 color = COLORS[types.index(point.category)]
                 shape = SHAPES[types.index(point.category)]
             
             point_tag = f"point_{point.category}"  # Use a unique tag for each point
             self.draw_data_points(x, y, color, shape, point_tag)
-          
+    
+    # Left-clicking feature
     def left_click(self, event):
         points = self.canvas.find_withtag("point")
 
-        # Different actions depending on already translated
         if self.translated:
             self.translated = False
-            # Move all points back to original
+            # If translated, move all points back to original
             for point_tag in points:
                 original_position, original_color = self.original_positions[point_tag]
                 self.canvas.coords(point_tag, original_position)
@@ -140,6 +146,7 @@ class ScatterPlot:
             #print("Original Positions:", self.original_positions)  
             
         else:
+            # If not translated
             self.translated = True
             # Move points to create a new grid system with the selected point as the origin
             move_x = 400-event.x
@@ -172,13 +179,14 @@ class ScatterPlot:
 
             current = event.widget.find_withtag("current")[0]
             self.canvas.itemconfig(current, fill='black')
-
+    
+    # Right-clicking feature
     def right_click(self, event):
         points = self.canvas.find_withtag("point")
 
         if self.highlighted:
-            # Reset highlighted points
             self.highlighted = False
+            # If already highlighted, reset highlighted points
             for point_tag in self.closest_points:
                 if point_tag in self.original_positions:
                     original_position, original_color = self.original_positions[point_tag]
@@ -195,7 +203,7 @@ class ScatterPlot:
                         self.canvas.itemconfig(point_tag, fill=original_color)
                 self.closest_points = []
             else:
-                # Turn on the highlighting if no points are selected
+                # If not highlighted, turn on the highlighting
                 self.highlighted = True
                 active = [event.x, event.y]
 
@@ -217,12 +225,13 @@ class ScatterPlot:
                 # Store closest points and highlight them
                 for _, point_tag in closest_points:
                     if "point" in self.canvas.gettags(point_tag): 
-                        # Store the original position and color if not already stored
+                        # Store the original position and color
                         if point_tag not in self.original_positions:
                             original_color = self.canvas.itemcget(point_tag, "fill")
                             original_position = self.canvas.coords(point_tag)
                             self.original_positions[point_tag] = (original_position, original_color)
-
+                        
+                        # Highlight data point
                         self.canvas.itemconfig(point_tag, fill='black')
                         self.closest_points.append(point_tag)
         
@@ -232,6 +241,7 @@ if __name__ == "__main__":
         "Enter the CSV file path: ")
     data = read_data(file_path)
 
+    # Create the Tkinter window
     root = tk.Tk()
     root.title("Scatter Plot")
 
