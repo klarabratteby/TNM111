@@ -2,6 +2,8 @@
 
 import csv
 import tkinter as tk
+from tkinter import ttk
+import math
 
 COLORS = ["red", "pink", "green"]
 SHAPES = ['circle', 'square', 'star']
@@ -13,35 +15,34 @@ class DataPoint:
         self.y = y
         self.category = category
 
-# Read csv files
 
-    def read_data(file_path):
-        with open(file_path, 'r') as file:
-            csvreader = csv.reader(file)
-            data = [DataPoint(float(row[0]), float(row[1]), row[2])
-                    for row in csvreader]
-        return data
+def read_data(file_path):
+    with open(file_path, 'r') as file:
+        csvreader = csv.reader(file)
+        data = [DataPoint(float(row[0]), float(row[1]), row[2])
+                for row in csvreader]
+    return data
 
-    def convert_to_float(value):
-        try:
-            return float(value)
-        except ValueError:
-            return None
+
+def convert_to_float(value):
+    try:
+        return float(value)
+    except ValueError:
+        return None
 
 
 class ScatterPlot:
-    # Initializer
-    def __init__(self, root, data):
-        self.root = root  # main window
-        self.data = data  # data
-        self.canvas = tk.Canvas(root, width=800, height=800)  # Tkinter widget
-        self.canvas.pack()  # packs the canvas within the main window
+    def __init__(self, root, canvas, data):
+        self.root = root
+        self.canvas = canvas
+        self.data = data
         self.selected_point = None
         self.new_origin = False
         self.neighbor_highlighted = False
         self.closest_points = []
 
     # Draw the x- and y-axis and the ticks and tick values.
+
     def draw_axes_ticks(self):
         self.draw_axis_lines()
         self.draw_ticks()
@@ -96,16 +97,16 @@ class ScatterPlot:
                 relx=0.95, rely=0.1 + 0.05 * i, anchor="ne")
     # Draw a data point with specified color, shape, and category
 
-    def draw_data_points(self, x, y, color, shape, category):
-        if shape == 'circle':
+    def draw_data_points(self, x, y, color, categories):
+        if categories == 'circle':
             element = self.canvas.create_oval(
-                x - 5, y - 5, x + 5, y + 5, fill=color, tags=["point", "{}".format(shape)])
-        elif shape == 'square':
-            element = self.canvas.create_rectangle(
-                x - 5, y - 5, x + 5, y + 5, fill=color, tags=["point", "{}".format(shape)])
-        elif shape == 'star':
+                x - 5, y - 5, x + 5, y + 5, fill=color, tags=["point", "{}".format(categories)])
+        elif categories == 'square':
+            element = self.canvas.create_oval(
+                x - 5, y - 5, x + 5, y + 5, fill=color, tags=["point", "{}".format(categories)])
+        elif categories == 'star':
             element = self.canvas.create_text(x, y, text="*", fill=color, font=("Purisa", 30),
-                                              tags=["point", "{}".format(shape)])
+                                              tags=["point", "{}".format(categories)])
         else:
             element = None
 
@@ -133,15 +134,87 @@ class ScatterPlot:
             self.canvas.tag_bind(point.category, '<Button-3>', lambda event,
                                  tag=point.category: self.right_click_event(event, tag))
 
+    def left_click_event(self, event, category):
+        if not self.new_origin:
+            self.new_origin = True
+            self.selected_point = category
+
+            # Get x_range and y_range directly from the method
+            x_range, y_range = self.calculate_axis_ranges()
+
+            # Mark the selected point
+            element = self.canvas.find_withtag(self.selected_point)[0]
+            self.canvas.itemconfig(element, outline="black", width=2)
+
+            # Change colors based on quadrants
+            for point in self.data:
+                x = round(400 + point.x * (350 / x_range))
+                y = round(400 - point.y * (350 / y_range))
+
+                if point.category != self.selected_point:
+                    if x > event.x and y > event.y:
+                        self.canvas.itemconfig(point.category, fill="red")
+                    elif x > event.x and y < event.y:
+                        self.canvas.itemconfig(point.category, fill="blue")
+                    elif x < event.x and y < event.y:
+                        self.canvas.itemconfig(point.category, fill="black")
+                    elif x < event.x and y > event.y:
+                        self.canvas.itemconfig(point.category, fill="orange")
+
+        else:
+            self.new_origin = False
+
+            # Unmark the selected point
+            element = self.canvas.find_withtag(self.selected_point)[0]
+            self.canvas.itemconfig(element, outline="")
+
+            # Reset colors
+            for point in self.data:
+                x = round(400 + point.x * (350 / x_range))
+                y = round(400 - point.y * (350 / y_range))
+
+    def right_click_event(self, event, category):
+        if not self.neighbor_highlighted:
+            self.neighbor_highlighted = True
+            self.selected_point = category
+
+            # Find the coordinates of the selected point
+            selected_point_coords = self.canvas.coords(self.selected_point)
+
+            # Calculate distances to all points
+            distances = [(point, self.calculate_distance(selected_point_coords, self.canvas.coords(point)))
+                         for point in self.canvas.find_withtag("point")]
+
+            # Sort distances and get the five closest points
+            distances.sort(key=lambda x: x[1])
+            closest_points = distances[:5]
+
+            # Highlight the closest points
+            for point, _ in closest_points:
+                self.canvas.itemconfig(point, outline="yellow", width=2)
+
+        else:
+            self.neighbor_highlighted = False
+
+            # Unhighlight the closest points
+            for point, _ in self.closest_points:
+                self.canvas.itemconfig(point, outline="", width=1)
+
+    def calculate_distance(self, point1, point2):
+        return math.sqrt((point1[0] - point2[0]) ** 2 + (point1[1] - point2[1]) ** 2)
+
 
 if __name__ == "__main__":
-    file_path = input("Enter the CSV file path: ")
-    data = DataPoint.read_data(file_path)  # Använda den som en statisk metod
+    csv_file_path = input("Enter the CSV file path: ")
+    data = read_data(csv_file_path)
 
     root = tk.Tk()
     root.title("Scatter Plot")
 
-    scatter_plot = ScatterPlot(root, data)
+    canvas = tk.Canvas(root, width=800, height=800)
+    canvas.pack()
+
+    scatter_plot = ScatterPlot(root, canvas, data)
     scatter_plot.draw_axes_ticks()
 
     types = list(set([point.category for point in data]))
