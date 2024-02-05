@@ -51,6 +51,7 @@ class ScatterPlot:
         self.highlighted = False
         self.latest_move = [0,0]
         self.closest_points = []
+        self.original_positions = {}  # Store original positions for each point
         self.x_range, self.y_range = self.calculate_axis_ranges()  # Add x_range and y_range as attributes
 
     # Draw the x- and y-axis and the ticks and tick values.
@@ -146,38 +147,38 @@ class ScatterPlot:
             self.draw_data_points(x, y, color, shape, point_tag)
           
     def object_left_click_event(self, event):
-        
         points = self.canvas.find_withtag("point")
-   
+
         # Different actions depending on already translated
         if self.translated:
             self.translated = False
-
             # Move all points back to original
-            for i in points:
-                self.canvas.move(i, -self.latest_move[0], -self.latest_move[1])
-                # Switch color back to ordinary
-                tags = self.canvas.gettags(i)
-                default_color = COLORS[0]  
-                colorTag = tags[2] if len(tags) >= 3 else default_color
-                print(f"Setting color to {colorTag}")
-                self.canvas.itemconfig(i, fill=colorTag)
+            for point_tag in points:
+                original_position, original_color = self.original_positions[point_tag]
+                self.canvas.coords(point_tag, original_position)
+                self.canvas.itemconfig(point_tag, fill=original_color)
+            
             
         else:
             self.translated = True
-            # Move points
+            # Move points to create a new grid system with the selected point as the origin
             move_x = 400-event.x
             move_y = 400-event.y
-            self.latest_move = [move_x, move_y]           
-                    
+            self.latest_move = [move_x, move_y]
+
+            # Store the original positions and colors before the translation
+            for point_tag in points:
+                original_color = self.canvas.itemcget(point_tag, "fill")
+                original_position = self.canvas.coords(point_tag)
+                self.original_positions[point_tag] = (original_position, original_color)
+
+            
             # Loop through all points with tag "point"
             for i in range(len(points)):
+                # Move the point to the new position in the grid system
                 self.canvas.move(points[i], move_x, move_y)
-                
-                
+
                 p = self.canvas.coords(points[i])
-             
-                # Change color
             
                 if p[0] > 400 and p[1] > 400:
                     colorTag = "red"
@@ -187,13 +188,11 @@ class ScatterPlot:
                     colorTag = "black"
                 elif p[0] < 400 and p[1] > 400:
                     colorTag = "orange"
-
-                print(f"Setting color to {colorTag}")
                 self.canvas.itemconfig(points[i], fill=colorTag)
-
-            current = event.widget.find_withtag("current")[0]
-            self.canvas.itemconfig(current, fill='yellow')       
-
+        current = event.widget.find_withtag("current")[0]
+        self.canvas.itemconfig(current, fill='yellow')
+       
+    
     def object_right_click_event(self, event):
         if self.highlighted: 
             self.highlighted = False
