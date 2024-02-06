@@ -13,7 +13,7 @@ SHAPES = ['circle', 'square', 'star']
 class DataPoint:
     def __init__(self, x, y, category):
         self.x = x
-        self.y = y
+        self.y = y # negative if flip y-axis
         self.category = category
 
 # Read data from csv-file
@@ -122,7 +122,7 @@ class ScatterPlot:
         # Calculate coordinates based on data point and axis ranges
         for point in self.data:
             x = round(400 + point.x * (350 / x_range))
-            y = round(400 - point.y * (350 / y_range))
+            y = round(400 - point.y * (350 / y_range)) # flipped
 
             # Get the color and shape based on the category
             if point.category in types:
