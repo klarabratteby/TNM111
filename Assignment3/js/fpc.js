@@ -1,11 +1,3 @@
-/**
- *
-    Author: Kahin Akram
-    Date: Jan 24, 2020
-    TNM048 Lab 1 - Visual Information-Seeking Mantra
-    Focus+Context file
- *
-*/
 function focusPlusContext(data) {
   // Creating margins and figure sizes
   var margin = { top: 20, right: 20, bottom: 150, left: 40 },
@@ -52,7 +44,7 @@ function focusPlusContext(data) {
    * Task 1 - Parse date with timeParse to year-month-day
    */
 
-  var parseDate = d3.timeParse("%Y-%m-%d");
+  let parseDate = d3.timeParse("%Y-%m-%d");
 
   /**
    * Task 2 - Define scales and axes for scatterplot
@@ -75,7 +67,10 @@ function focusPlusContext(data) {
 
   var brush = d3
     .brushX()
-    .extent([0, 0], [width, height2])
+    .extent([
+      [0, 0],
+      [width, height2],
+    ])
     .on("brush end", brushed);
 
   //Setting scale parameters
@@ -99,10 +94,10 @@ function focusPlusContext(data) {
    * Task 5 - Set the axes scales, both for focus and context.
    */
 
-  xScale.domain([minDate, maxDate_plus]);
-  yScale.domain([0, maxMag]);
-  navXScale.domain(xScale.domain);
-  navYScale.domain(yScale.domain);
+  xScale.domain([minDate, maxDate]);
+  yScale.domain([maxDate, minMag]);
+  navXScale.domain([minDate, maxDate]);
+  navYScale.domain([minMag, maxMag]);
 
   //<---------------------------------------------------------------------------------------------------->
 
@@ -123,14 +118,16 @@ function focusPlusContext(data) {
     .attr("class", "axis axis--x")
     .attr("transform", "translate(0," + height2 + ")")
     .call(navXAxis);
-  //here..
 
   /**
    * Task 7 - Plot the small dots on the context graph.
    */
   small_points = dots
     .selectAll("dot")
-    //here...
+    .data(data.features)
+    .enter()
+    .append("circle")
+    .attr("class", "dotContext")
     .filter(function (d) {
       return d.properties.EQ_PRIMARY != null;
     })
@@ -143,9 +140,10 @@ function focusPlusContext(data) {
 
   /**
    * Task 8 - Call plot function.
-   * plot(points,nr,nr) try to use different numbers for the scaling.
+   plot(points,nr,nr) try to use different numbers for the scaling.
    */
-
+  var points = new Points();
+  points.plot(small_points, 1, 1);
   //<---------------------------------------------------------------------------------------------------->
 
   /**
@@ -159,10 +157,13 @@ function focusPlusContext(data) {
   /**
    * Task 10 - Call x and y axis
    */
-  focus.append("g");
-  //here..
-  focus.append("g");
-  //here..
+  focus.append("g").attr("class", "axis axis--x");
+  focus
+    .append("g")
+    .attr("transform", "translate(0," + height + ")")
+    .call(xAxis);
+
+  focus.append("g").attr("class", "axis axis--y").call(yAxisAxis);
 
   //Add y axis label to the scatter plot
   d3.select(".legend").style("left", "170px").style("top", "300px");
@@ -182,7 +183,11 @@ function focusPlusContext(data) {
    */
   selected_dots = dots
     .selectAll("dot")
-    //here..
+    .data(data.features)
+    .enter()
+    .append("circle")
+    .attr("class", "dot")
+    .attr("style", "opacity:0.5;")
     .filter(function (d) {
       return d.properties.EQ_PRIMARY != null;
     })
@@ -197,7 +202,7 @@ function focusPlusContext(data) {
    * Task 12 - Call plot function
    * plot(points,nr,nr) no need to send any integers!
    */
-
+  points.plot(selected_dots, 1, 2);
   //<---------------------------------------------------------------------------------------------------->
 
   //Mouseover function
@@ -268,7 +273,11 @@ function focusPlusContext(data) {
    * implmented if we put the brush before.
    */
 
-  //here..
+  context
+    .append("g")
+    .attr("class", "brush")
+    .call(brush)
+    .call(brush.move, xScale.range());
 
   //<---------------------------------------------------------------------------------------------------->
 
