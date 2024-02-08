@@ -142,8 +142,8 @@ function focusPlusContext(data) {
    * Task 8 - Call plot function.
    plot(points,nr,nr) try to use different numbers for the scaling.
    */
-  var points = new Points();
-  points.plot(small_points, 1, 1);
+  let points = new Points();
+  points.plot(small_points, 100, 2);
   //<---------------------------------------------------------------------------------------------------->
 
   /**
@@ -157,13 +157,13 @@ function focusPlusContext(data) {
   /**
    * Task 10 - Call x and y axis
    */
-  focus.append("g").attr("class", "axis axis--x");
   focus
     .append("g")
-    .attr("transform", "translate(0," + height + ")")
+    .attr("class", "axis axis--x")
+    .attr("transform", "translate(0, " + height + ")")
     .call(xAxis);
 
-  focus.append("g").attr("class", "axis axis--y").call(yAxisAxis);
+  focus.append("g").attr("class", "axis axis--y").call(yAxis);
 
   //Add y axis label to the scatter plot
   d3.select(".legend").style("left", "170px").style("top", "300px");
@@ -187,7 +187,7 @@ function focusPlusContext(data) {
     .enter()
     .append("circle")
     .attr("class", "dot")
-    .attr("style", "opacity:0.5;")
+    .attr("style", "opacity: 0.9;")
     .filter(function (d) {
       return d.properties.EQ_PRIMARY != null;
     })
