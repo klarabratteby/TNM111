@@ -50,7 +50,7 @@ function focusPlusContext(data) {
    * Task 2 - Define scales and axes for scatterplot
    */
   var xScale = d3.scaleTime().range([0, width]);
-  var yScale = d3.scaleLinear().range([height, 0]);
+  var yScale = d3.scaleLinear().range([0, height]);
   var xAxis = d3.axisBottom(xScale);
   var yAxis = d3.axisLeft(yScale);
 
@@ -95,7 +95,7 @@ function focusPlusContext(data) {
    */
 
   xScale.domain([minDate, maxDate]);
-  yScale.domain([maxDate, minMag]);
+  yScale.domain([maxMag, minMag]);
   navXScale.domain([minDate, maxDate]);
   navYScale.domain([minMag, maxMag]);
 
@@ -216,6 +216,7 @@ function focusPlusContext(data) {
       /**
        * Task 13 - Update information in the "tooltip" by calling the tooltip function.
        */
+      points.tooltip(d);
 
       //Rescale the dots onhover
       d3.select(this).attr("r", 15);
