@@ -44,7 +44,7 @@ function worldMap(data) {
    */
   //Transforming to the specific projection
 
-  let transform = d3.geoTransform({ point: prodjectpPointsOnMap });
+  let transform = d3.geoTransform({ point: projectPointsOnMap });
   let d3path = d3.geoPath().projection(transform);
 
   // similar to projectPoint this function converts lat/long to
@@ -98,7 +98,7 @@ function worldMap(data) {
       points.tooltip(d);
 
       //Uncomment if implemented
-      //focus_plus_context.hovered();
+      focus_plus_context.hovered();
     });
   }
 
