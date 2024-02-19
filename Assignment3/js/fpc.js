@@ -314,7 +314,7 @@ function focusPlusContext(data) {
       /**
        * Remove comment for updating dots on the map.
        */
-      //curr_points_view = world_map.change_map_points(curr_view_erth)
+      curr_points_view = world_map.change_map_points(curr_view_erth);
     }
   }
 
