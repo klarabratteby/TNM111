@@ -98,7 +98,7 @@ function worldMap(data) {
       points.tooltip(d);
 
       //Uncomment if implemented
-      focus_plus_context.hovered();
+      //focus_plus_context.hovered();
     });
   }
 
