@@ -1,0 +1,13 @@
+.container {
+  justify-content: center;
+  color: blueviolet;
+}
+
+#visualization {
+  border: 1px solid black;
+}
+
+div.info {
+  position: center;
+  color: red;
+}
