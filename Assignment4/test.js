@@ -2,39 +2,7 @@
 //console.log(data);
 
 document.addEventListener("DOMContentLoaded", function () {
-  // Data
-  const data = {
-    nodes: [
-      {
-        name: "R2-D2",
-        value: 171,
-        colour: "#bde0f6",
-      },
-      {
-        name: "CHEWBACCA",
-        value: 145,
-        colour: "#A0522D",
-      },
-      {
-        name: "BB-8",
-        value: 40,
-        colour: "#eb5d00",
-      },
-    ],
-    links: [
-      {
-        source: 1,
-        target: 0,
-        value: 17,
-      },
-      {
-        source: 2,
-        target: 0,
-        value: 2,
-      },
-    ],
-  };
-
+  /** 
   // Create SVG
   const svg = d3
       .select("#visualization")
@@ -42,9 +10,25 @@ document.addEventListener("DOMContentLoaded", function () {
       .attr("height", 600),
     width = +svg.attr("width"),
     height = +svg.attr("height");
+  */
+  const width = 200; // Adjust width as needed
+  const height = 200; // Adjust height as needed
+  // Create SVG for the first diagram
+  const svg1 = d3
+    .select("#diagram1")
+    .append("svg")
+    .attr("width", width) // Adjust width as needed
+    .attr("height", height); // Adjust height as needed
+
+  // Create SVG for the second diagram
+  const svg2 = d3
+    .select("#diagram2")
+    .append("svg")
+    .attr("width", width) // Adjust width as needed
+    .attr("height", height); // Adjust height as needed
 
   // Function to display nodes and links
-  function displayGraph(nodes, links) {
+  function displayGraph(svg, nodes, links) {
     const simulation = d3
       .forceSimulation(nodes)
       .force(
@@ -90,10 +74,11 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadData() {
     try {
       const response = await fetch(
-        "starwars-interactions/starwars-episode-2-interactions-allCharacters.json"
+        "starwars-interactions/starwars-episode-7-interactions-allCharacters.json"
       );
       const data = await response.json();
-      displayGraph(data.nodes, data.links);
+      displayGraph(svg1, data.nodes, data.links);
+      displayGraph(svg2, data.nodes, data.links);
     } catch (error) {
       console.error("Error fetching data:", error);
     }

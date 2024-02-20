@@ -6,10 +6,19 @@
   align-items: center;
 }
 
-#visualization {
-  border: 1px solid black;
-  width: 800px;
-  height: 600px;
+.diagrams-container {
+  display: flex;
+}
+
+#digram1 {
+  width: 200px;
+  height: 200px;
+  
+}
+#digram2 {
+  width: 200px;
+  height: 200px;
+  
 }
 
 div.info {
