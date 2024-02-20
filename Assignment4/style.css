@@ -1,13 +1,17 @@
 .container {
   justify-content: center;
   color: blueviolet;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #visualization {
   border: 1px solid black;
+  width: 800px;
+  height: 600px;
 }
 
 div.info {
-  position: center;
-  color: red;
+  position:absolute; 
 }

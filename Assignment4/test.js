@@ -1,75 +1,90 @@
 //const data = require("./starwars-interactions/starwars-full-interactions-allCharacters.json");
 //console.log(data);
 
-// Define nodeDiagram function
-function nodeDiagram(svg, nodes, links) {
-  var width = 600,
-    height = 400;
+document.addEventListener("DOMContentLoaded", function () {
+  // Data
+  const data = {
+    nodes: [
+      {
+        name: "R2-D2",
+        value: 171,
+        colour: "#bde0f6",
+      },
+      {
+        name: "CHEWBACCA",
+        value: 145,
+        colour: "#A0522D",
+      },
+      {
+        name: "BB-8",
+        value: 40,
+        colour: "#eb5d00",
+      },
+    ],
+    links: [
+      {
+        source: 1,
+        target: 0,
+        value: 17,
+      },
+      {
+        source: 2,
+        target: 0,
+        value: 2,
+      },
+    ],
+  };
 
-  var simulation = d3
-    .forceSimulation(nodes)
-    .force("charge", d3.forceManyBody())
-    .force("center", d3.forceCenter(width / 2, height / 2))
-    .on("tick", ticked);
+  // Create SVG
+  const svg = d3
+      .select("#visualization")
+      .attr("width", 800)
+      .attr("height", 600),
+    width = +svg.attr("width"),
+    height = +svg.attr("height");
 
-  var info = d3.select("body").append("div").attr("class", "info");
+  // Function to display nodes and links
+  function displayGraph(nodes, links) {
+    const simulation = d3
+      .forceSimulation(nodes)
+      .force(
+        "link",
+        d3.forceLink(links).id((d) => d.index)
+      )
+      .force("charge", d3.forceManyBody())
+      .force("center", d3.forceCenter(width / 2, height / 2));
 
-  var link = svg.selectAll(".link").data(links);
-  var node = svg.selectAll(".node").data(nodes);
+    simulation.on("tick", () => {
+      const link = svg
+        .selectAll("line")
+        .data(links)
+        .enter()
+        .append("line")
+        .attr("stroke", "black")
+        .attr("stroke-width", (d) => Math.sqrt(d.value));
 
-  function createLinks() {
-    link = link.data(links);
-    link.exit().remove();
-    link = link
-      .enter()
-      .append("line")
-      .attr("class", "link")
-      .merge(link)
-      .attr("x1", (d) => d.source.x)
-      .attr("y1", (d) => d.source.y)
-      .attr("x2", (d) => d.target.x)
-      .attr("y2", (d) => d.target.y);
+      const node = svg
+        .selectAll("circle")
+        .data(nodes)
+        .enter()
+        .append("circle")
+        .attr("r", (d) => Math.sqrt(d.value))
+        .attr("fill", (d) => d.colour);
+
+      link
+        .merge(svg.selectAll("line"))
+        .attr("x1", (d) => d.source.x)
+        .attr("y1", (d) => d.source.y)
+        .attr("x2", (d) => d.target.x)
+        .attr("y2", (d) => d.target.y);
+
+      node
+        .merge(svg.selectAll("circle"))
+        .attr("cx", (d) => d.x)
+        .attr("cy", (d) => d.y);
+    });
   }
 
-  function ticked() {
-    var u = svg
-      .selectAll(".node")
-      .data(nodes)
-      .join("circle")
-      .attr("class", "node")
-      .attr("r", 5)
-      .attr("cx", function (d) {
-        return d.x;
-      })
-      .attr("cy", function (d) {
-        return d.y;
-      });
-  }
-}
-
-// Load Star Wars data using d3.json
-d3.json(
-  "./starwars-interactions/starwars-full-interactions-allCharacters.json",
-  function (error, data) {
-    if (error) {
-      console.error("Error loading data:", error);
-      return;
-    }
-
-    console.log("Loaded data:", data); // Log the fetched JSON data
-
-    var links = data.links;
-    var nodes = data.nodes;
-
-    // Select SVG element
-    var svg = d3.select("#visualization");
-
-    if (svg.empty()) {
-      console.error("SVG element not found.");
-      return;
-    }
-
-    // Call nodeDiagram function
-    nodeDiagram(svg, nodes, links);
-  }
-);
+  // Call displayGraph function
+  displayGraph(data.nodes, data.links);
+});
