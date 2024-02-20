@@ -86,5 +86,19 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Call displayGraph function
-  displayGraph(data.nodes, data.links);
+  //displayGraph(data.nodes, data.links);
+  async function loadData() {
+    try {
+      const response = await fetch(
+        "starwars-interactions/starwars-episode-2-interactions-allCharacters.json"
+      );
+      const data = await response.json();
+      displayGraph(data.nodes, data.links);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
+
+  // Call loadData function
+  loadData();
 });
