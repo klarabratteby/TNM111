@@ -21,7 +21,9 @@
   height: 200px;
   
 }
-
-div.info {
-  position:absolute; 
+.control-panel {
+  margin: 20px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
