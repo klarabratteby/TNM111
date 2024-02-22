@@ -6,7 +6,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Star Wars</title>
         <script src="https://d3js.org/d3.v7.min.js"></script>
-        <script src="./test.js"></script>
+        <script src="./index.js"></script>
         <link rel="stylesheet" href="./style.css" />
 
     </head>
@@ -14,13 +14,14 @@
     <body class="container">
       <h1>Star Wars</h1>
       <div class="diagrams-container">
-        <svg id="diagram1" width="200" height="200"></svg>
-        <svg id="diagram2" width="200" height="200"></svg>
+        <svg id="diagram1" width="400" height="400"></svg>
+        <svg id="diagram2" width="400" height="400"></svg>
       </div>
-      <div class="control-panel">
+      
         <label for="weightSlider">Filter by Edge Weight:</label>
-        <input type="range" id="weightSlider" min="1" max="10" value="1">
-      </div>
+        <input type="range" id="weightSlider" min="1" max="30" value="1">
+        <span id="weightValue">1</span>
+     
       
        
     </body>
