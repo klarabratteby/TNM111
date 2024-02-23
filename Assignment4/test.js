@@ -15,13 +15,14 @@ document.addEventListener("DOMContentLoaded", function () {
     .attr("height", height);
 
   let data; // Variabel för att lagra länkdata
-  let weightThreshold = 1; // Värdet på vikttröskeln
+  let weightThreshold1 = 1; // Värdet på vikttröskeln
+  let weightThreshold2 = 1;
 
   // Get the tooltip containers
   const tooltipContainer1 = document.querySelector(".tooltip1");
   const tooltipContainer2 = document.querySelector(".tooltip2");
 
-  function displayGraph(svg, nodes, links, tooltipContainer) {
+  function displayGraph(svg, nodes, links, tooltipContainer, weightThreshold) {
     const filteredLinks = links.filter((link) => link.value >= weightThreshold);
 
     const simulation = d3
@@ -74,16 +75,28 @@ document.addEventListener("DOMContentLoaded", function () {
         "starwars-interactions/starwars-episode-3-interactions-allCharacters.json"
       );
       data = await response.json();
-      displayGraph(svg1, data.nodes, data.links);
-      displayGraph(svg2, data.nodes, data.links);
-
+      displayGraph(
+        svg1,
+        data.nodes,
+        data.links,
+        tooltipContainer1,
+        weightThreshold1
+      );
+      displayGraph(
+        svg2,
+        data.nodes,
+        data.links,
+        tooltipContainer2,
+        weightThreshold2
+      );
       // Add event listeners after SVG elements are loaded
       svg1.on("mouseover", function () {
         svg1
           .selectAll("circle")
           .on("mouseover", (event, d) =>
             showNodeDetails(event, d, tooltipContainer1)
-          );
+          )
+          .on("mouseout", (event) => resetNode(event, tooltipContainer1));
       });
 
       svg2.on("mouseover", function () {
@@ -91,7 +104,8 @@ document.addEventListener("DOMContentLoaded", function () {
           .selectAll("circle")
           .on("mouseover", (event, d) =>
             showNodeDetails(event, d, tooltipContainer2)
-          );
+          )
+          .on("mouseout", (event) => resetNode(event, tooltipContainer2));
       });
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -127,20 +141,40 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-  // Event listener for slider
-  const weightSlider = document.getElementById("weightSlider");
-  const weightValue = document.getElementById("weightValue"); // Hämta elementet som visar slidervärdet
-  weightValue.textContent = weightSlider.value; // Uppdatera det första värdet
+  // Slider 1
+  const weightSlider1 = document.getElementById("weightSlider1");
+  const weightValue1 = document.getElementById("weightValue1");
+  weightValue1.textContent = weightSlider1.value; // Set initial value
 
-  weightSlider.addEventListener("input", function () {
-    weightThreshold = +this.value;
-    weightValue.textContent = this.value; // Uppdatera slidervärdet som visas
+  weightSlider1.addEventListener("input", function () {
+    weightThreshold1 = +this.value;
+    weightValue1.textContent = weightThreshold1;
+    svg1.selectAll("*").remove(); // Clear the visualization
+    displayGraph(
+      svg1,
+      data.nodes,
+      data.links,
+      tooltipContainer1,
+      weightThreshold1
+    ); // Redraw with new threshold
+  });
 
-    // Uppdatera diagrammen när slidervärdet ändras
-    svg1.selectAll("*").remove(); // Ta bort befintliga element
-    svg2.selectAll("*").remove(); // Ta bort befintliga element
-    displayGraph(svg1, data.nodes, data.links, tooltipContainer1);
-    displayGraph(svg2, data.nodes, data.links, tooltipContainer2);
+  // Slider 2
+  const weightSlider2 = document.getElementById("weightSlider2");
+  const weightValue2 = document.getElementById("weightValue2");
+  weightValue2.textContent = weightSlider2.value; // Set initial value
+
+  weightSlider2.addEventListener("input", function () {
+    weightThreshold2 = +this.value;
+    weightValue2.textContent = weightThreshold2;
+    svg2.selectAll("*").remove(); // Clear the visualization
+    displayGraph(
+      svg2,
+      data.nodes,
+      data.links,
+      tooltipContainer2,
+      weightThreshold2
+    ); // Redraw with new threshold
   });
 });
 
@@ -160,6 +194,7 @@ function showNodeDetails(event, node, tooltipContainer) {
 }
 
 function resetNode(event, tooltipContainer) {
+  const currentSvg = d3.select(event.target.closest("svg"));
   const isHoveringSameSvg = currentSvg.node() === event.currentTarget;
   if (!isHoveringSameSvg) {
     hideTooltip(tooltipContainer);
