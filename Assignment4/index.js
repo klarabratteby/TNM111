@@ -18,7 +18,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let weightThreshold1 = 1; // Värdet på vikttröskeln
   let weightThreshold2 = 1;
 
-  function displayGraph(svg, nodes, links, weightThreshold) {
+  // Get the tooltip containers
+  const tooltipContainer1 = document.querySelector(".tooltip1");
+  const tooltipContainer2 = document.querySelector(".tooltip2");
+
+  function displayGraph(svg, nodes, links, tooltipContainer, weightThreshold) {
     const filteredLinks = links.filter((link) => link.value >= weightThreshold);
 
     const simulation = d3
@@ -45,7 +49,14 @@ document.addEventListener("DOMContentLoaded", function () {
       .append("circle")
       .attr("r", 5) // Använder en fast radie för noderna
       .attr("fill", (d) => d.colour) // Använd färgen från datan
-      .on("mouseover", (event, d) => brushLink(d));
+      .on("mouseover", (event, d) =>
+        showNodeDetails(event, d, tooltipContainer, weightThreshold)
+      ) // Call function to show node details on mouseover
+      .on("mouseout", () => resetNode(event, tooltipContainer, weightThreshold)) // Call function to reset node on mouseout
+      .on("click", (event, d) => brushLink(d)); // Call function to handle brushing on node click
+
+    // Tooltip
+    node.append("title").text((d) => d.name); // Tooltip with node name
 
     simulation.on("tick", () => {
       link
@@ -64,8 +75,36 @@ document.addEventListener("DOMContentLoaded", function () {
         "starwars-interactions/starwars-episode-3-interactions-allCharacters.json"
       );
       data = await response.json();
-      displayGraph(svg1, data.nodes, data.links, weightThreshold1);
-      displayGraph(svg2, data.nodes, data.links, weightThreshold2);
+      displayGraph(
+        svg1,
+        data.nodes,
+        data.links,
+        tooltipContainer1,
+        weightThreshold1
+      );
+      displayGraph(
+        svg2,
+        data.nodes,
+        data.links,
+        tooltipContainer2,
+        weightThreshold2
+      );
+      // Add event listeners after SVG elements are loaded
+      svg1.on("mouseover", function () {
+        svg1
+          .selectAll("circle")
+          .on("mouseover", (event, d) =>
+            showNodeDetails(event, d, tooltipContainer1, weightThreshold1)
+          );
+      });
+
+      svg2.on("mouseover", function () {
+        svg2
+          .selectAll("circle")
+          .on("mouseover", (event, d) =>
+            showNodeDetails(event, d, tooltipContainer2, weightThreshold2)
+          );
+      });
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -109,7 +148,13 @@ document.addEventListener("DOMContentLoaded", function () {
     weightThreshold1 = +this.value;
     weightValue1.textContent = weightThreshold1;
     svg1.selectAll("*").remove(); // Clear the visualization
-    displayGraph(svg1, data.nodes, data.links, weightThreshold1); // Redraw with new threshold
+    displayGraph(
+      svg1,
+      data.nodes,
+      data.links,
+      tooltipContainer1,
+      weightThreshold1
+    ); // Redraw with new threshold
   });
 
   // Slider 2
@@ -121,6 +166,50 @@ document.addEventListener("DOMContentLoaded", function () {
     weightThreshold2 = +this.value;
     weightValue2.textContent = weightThreshold2;
     svg2.selectAll("*").remove(); // Clear the visualization
-    displayGraph(svg2, data.nodes, data.links, weightThreshold2); // Redraw with new threshold
+    displayGraph(
+      svg2,
+      data.nodes,
+      data.links,
+      tooltipContainer2,
+      weightThreshold2
+    ); // Redraw with new threshold
   });
 });
+
+function showNodeDetails(event, node, tooltipContainer) {
+  // Extract necessary information from the node
+  let characterName = node.name;
+  let numberOfScenes = node.value;
+
+  // Determine which SVG container triggered the event
+  const svgId = event.target.closest("svg").id;
+
+  // Construct tooltip content
+  let tooltipContent = `Character: ${characterName}<br>Number of Scenes: ${numberOfScenes}`;
+
+  // Display tooltip
+  displayTooltip(tooltipContent, event.pageX, event.pageY, tooltipContainer);
+}
+
+function resetNode(event, tooltipContainer, weightThreshold) {
+  const isHoveringSameSvg = currentSvg.node() === event.currentTarget;
+  if (!isHoveringSameSvg) {
+    hideTooltip(tooltipContainer);
+  }
+}
+
+function displayTooltip(content, x, y, tooltipContainer) {
+  // Display tooltip with provided content
+  // Update the content of the specified tooltip container
+  tooltipContainer.innerHTML = content;
+  // Adjust the position of the tooltip
+  tooltipContainer.style.left = x + "px";
+  tooltipContainer.style.top = y + "px";
+  // Show the tooltip
+  tooltipContainer.style.visibility = "visible";
+}
+
+function hideTooltip(tooltipContainer) {
+  // Hide tooltip
+  tooltipContainer.style.visibility = "hidden";
+}
