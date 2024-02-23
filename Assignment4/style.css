@@ -35,3 +35,14 @@
   height: 120px;
 
 }
+.tooltip1,
+.tooltip2 {
+  position: absolute;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 5px;
+  border-radius: 5px;
+  pointer-events: none; /* Ensures the tooltip doesn't interfere with mouse events */
+  z-index: 10; /* Ensure tooltips appear above other elements */
+  visibility: hidden; /* Initially hidden */
+}

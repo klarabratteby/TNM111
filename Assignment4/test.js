@@ -17,7 +17,11 @@ document.addEventListener("DOMContentLoaded", function () {
   let data; // Variabel för att lagra länkdata
   let weightThreshold = 1; // Värdet på vikttröskeln
 
-  function displayGraph(svg, nodes, links) {
+  // Get the tooltip containers
+  const tooltipContainer1 = document.querySelector(".tooltip1");
+  const tooltipContainer2 = document.querySelector(".tooltip2");
+
+  function displayGraph(svg, nodes, links, tooltipContainer) {
     const filteredLinks = links.filter((link) => link.value >= weightThreshold);
 
     const simulation = d3
@@ -44,7 +48,14 @@ document.addEventListener("DOMContentLoaded", function () {
       .append("circle")
       .attr("r", 5) // Använder en fast radie för noderna
       .attr("fill", (d) => d.colour) // Använd färgen från datan
-      .on("mouseover", (event, d) => brushLink(d));
+      .on("mouseover", (event, d) =>
+        showNodeDetails(event, d, tooltipContainer)
+      ) // Call function to show node details on mouseover
+      .on("mouseout", () => resetNode(event, tooltipContainer)) // Call function to reset node on mouseout
+      .on("click", (event, d) => brushLink(d)); // Call function to handle brushing on node click
+
+    // Tooltip
+    node.append("title").text((d) => d.name); // Tooltip with node name
 
     simulation.on("tick", () => {
       link
@@ -65,6 +76,23 @@ document.addEventListener("DOMContentLoaded", function () {
       data = await response.json();
       displayGraph(svg1, data.nodes, data.links);
       displayGraph(svg2, data.nodes, data.links);
+
+      // Add event listeners after SVG elements are loaded
+      svg1.on("mouseover", function () {
+        svg1
+          .selectAll("circle")
+          .on("mouseover", (event, d) =>
+            showNodeDetails(event, d, tooltipContainer1)
+          );
+      });
+
+      svg2.on("mouseover", function () {
+        svg2
+          .selectAll("circle")
+          .on("mouseover", (event, d) =>
+            showNodeDetails(event, d, tooltipContainer2)
+          );
+      });
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -111,7 +139,45 @@ document.addEventListener("DOMContentLoaded", function () {
     // Uppdatera diagrammen när slidervärdet ändras
     svg1.selectAll("*").remove(); // Ta bort befintliga element
     svg2.selectAll("*").remove(); // Ta bort befintliga element
-    displayGraph(svg1, data.nodes, data.links);
-    displayGraph(svg2, data.nodes, data.links);
+    displayGraph(svg1, data.nodes, data.links, tooltipContainer1);
+    displayGraph(svg2, data.nodes, data.links, tooltipContainer2);
   });
 });
+
+function showNodeDetails(event, node, tooltipContainer) {
+  // Extract necessary information from the node
+  let characterName = node.name;
+  let numberOfScenes = node.value;
+
+  // Determine which SVG container triggered the event
+  const svgId = event.target.closest("svg").id;
+
+  // Construct tooltip content
+  let tooltipContent = `Character: ${characterName}<br>Number of Scenes: ${numberOfScenes}`;
+
+  // Display tooltip
+  displayTooltip(tooltipContent, event.pageX, event.pageY, tooltipContainer);
+}
+
+function resetNode(event, tooltipContainer) {
+  const isHoveringSameSvg = currentSvg.node() === event.currentTarget;
+  if (!isHoveringSameSvg) {
+    hideTooltip(tooltipContainer);
+  }
+}
+
+function displayTooltip(content, x, y, tooltipContainer) {
+  // Display tooltip with provided content
+  // Update the content of the specified tooltip container
+  tooltipContainer.innerHTML = content;
+  // Adjust the position of the tooltip
+  tooltipContainer.style.left = x + "px";
+  tooltipContainer.style.top = y + "px";
+  // Show the tooltip
+  tooltipContainer.style.visibility = "visible";
+}
+
+function hideTooltip(tooltipContainer) {
+  // Hide tooltip
+  tooltipContainer.style.visibility = "hidden";
+}

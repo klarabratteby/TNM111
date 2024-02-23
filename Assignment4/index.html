@@ -4,8 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Star Wars Control System</title>
-  <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="./index.js" defer></script>
+  
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -13,7 +12,9 @@
     <h1>Star Wars Control System</h1>
     <div class="all">
       <div class="panel1">
-        <div class="details1"></div>
+        <div class="details1">
+          <div class="tooltip1"></div>
+        </div>
         <div class="control-panel1"></div>
       </div>
       <div class="diagrams-container">
@@ -21,11 +22,15 @@
         <svg id="diagram2" width="400" height="400"></svg>
       </div>
       <div class="panel2">
-        <div class="details2"></div>
+        <div class="details2">
+          <div class="tooltip2"></div>
+        </div>
         <div class="control-panel2"></div>
       </div>
     </div>  
   </div>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="./test.js" defer></script>
 </body>
 </html>
 
