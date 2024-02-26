@@ -72,7 +72,7 @@ document.addEventListener("DOMContentLoaded", function () {
   async function loadData() {
     try {
       const response = await fetch(
-        "starwars-interactions/starwars-episode-3-interactions-allCharacters.json"
+        "/Users/klarabratteby/Desktop/Skola/TNM111/Assignment4/starwars-interactions"
       );
       data = await response.json();
       displayGraph(

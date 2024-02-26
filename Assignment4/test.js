@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", function () {
-  const width = 400; // Justera bredden vid behov
-  const height = 400; // Justera höjden vid behov
+  const width = 400;
+  const height = 400;
 
   const svg1 = d3
     .select("#diagram1")
@@ -14,14 +14,14 @@ document.addEventListener("DOMContentLoaded", function () {
     .attr("width", width)
     .attr("height", height);
 
-  let data; // Variabel för att lagra länkdata
-  let weightThreshold1 = 1; // Värdet på vikttröskeln
+  let data;
+  let weightThreshold1 = 1;
   let weightThreshold2 = 1;
 
-  // Get the tooltip containers
+  // Tooltip containers
   const tooltipContainer1 = document.querySelector(".tooltip1");
   const tooltipContainer2 = document.querySelector(".tooltip2");
-
+  // Function to display the graph in SVG
   function displayGraph(svg, nodes, links, tooltipContainer, weightThreshold) {
     const filteredLinks = links.filter((link) => link.value >= weightThreshold);
 
@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
         d3.forceLink(filteredLinks).id((d) => d.index)
       )
       .force("charge", d3.forceManyBody())
-      .force("center", d3.forceCenter(width / 2, height / 2));
+      .force("center", d3.forceCenter(400 / 2, 400 / 2)); // Adjust the center force to 400
 
     const link = svg
       .selectAll("line")
@@ -40,23 +40,24 @@ document.addEventListener("DOMContentLoaded", function () {
       .enter()
       .append("line")
       .attr("stroke", "black")
-      .attr("stroke-width", (d) => Math.sqrt(d.value));
+      .attr("stroke-width", 1);
 
     const node = svg
       .selectAll("circle")
       .data(nodes)
       .enter()
       .append("circle")
-      .attr("r", 5) // Använder en fast radie för noderna
-      .attr("fill", (d) => d.colour) // Använd färgen från datan
+      .attr("r", 5)
+      .attr("fill", (d) => d.colour)
+      // Apply details-on-demand on nodes
       .on("mouseover", (event, d) =>
         showNodeDetails(event, d, tooltipContainer)
-      ) // Call function to show node details on mouseover
-      .on("mouseout", () => resetNode(event, tooltipContainer)) // Call function to reset node on mouseout
-      .on("click", (event, d) => brushLink(d)); // Call function to handle brushing on node click
+      )
+      .on("mouseout", () => resetNode(event, tooltipContainer))
+      // Apply brushing on nodes
+      .on("click", (event, d) => brushLink(d));
 
-    // Tooltip
-    node.append("title").text((d) => d.name); // Tooltip with node name
+    node.append("title").text((d) => d.name);
 
     simulation.on("tick", () => {
       link
@@ -68,151 +69,152 @@ document.addEventListener("DOMContentLoaded", function () {
       node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
     });
   }
-
-  async function loadData() {
+  // Function to load data from JSON
+  async function loadData(url, svg, tooltipContainer, weightThreshold) {
     try {
-      const response = await fetch(
-        "starwars-interactions/starwars-episode-3-interactions-allCharacters.json"
-      );
+      const response = await fetch(url);
       data = await response.json();
+      // Clear the existing visualizations for the specified SVG container
+      svg.selectAll("*").remove();
+      // Redraw the graph with the new data
       displayGraph(
-        svg1,
+        svg,
         data.nodes,
         data.links,
-        tooltipContainer1,
-        weightThreshold1
+        tooltipContainer,
+        weightThreshold
       );
-      displayGraph(
-        svg2,
-        data.nodes,
-        data.links,
-        tooltipContainer2,
-        weightThreshold2
-      );
-      // Add event listeners after SVG elements are loaded
-      svg1.on("mouseover", function () {
-        svg1
-          .selectAll("circle")
-          .on("mouseover", (event, d) =>
-            showNodeDetails(event, d, tooltipContainer1)
-          )
-          .on("mouseout", (event) => resetNode(event, tooltipContainer1));
-      });
-
-      svg2.on("mouseover", function () {
-        svg2
-          .selectAll("circle")
-          .on("mouseover", (event, d) =>
-            showNodeDetails(event, d, tooltipContainer2)
-          )
-          .on("mouseout", (event) => resetNode(event, tooltipContainer2));
-      });
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   }
 
-  // Call loadData function
-  loadData();
+  // Default dataset for svg1
+  loadData(
+    "starwars-interactions/starwars-full-interactions-allCharacters.json",
+    svg1,
+    tooltipContainer1,
+    weightThreshold1
+  );
 
-  // Function to handle brushing and linking
-  function brushLink(selectedNode) {
-    const nodes1 = svg1.selectAll("circle");
-    const nodes2 = svg2.selectAll("circle");
+  // Default dataset for svg2
+  loadData(
+    "starwars-interactions/starwars-full-interactions-allCharacters.json",
+    svg2,
+    tooltipContainer2,
+    weightThreshold2
+  );
 
-    // Clear existing selections
-    nodes1.attr("stroke", null);
-    nodes2.attr("stroke", null);
+  // Dropdown menu for dataset1
+  const dataset1Select = document.getElementById("dataset1");
+  dataset1Select.addEventListener("change", function () {
+    const selectedDataset = this.value;
+    loadData(selectedDataset, svg1, tooltipContainer1, weightThreshold1);
+  });
 
-    // Highlight selected node in both diagrams
-    nodes1.each(function (d) {
-      if (d.index === selectedNode.index) {
-        d3.select(this).attr("stroke", "yellow").attr("r", 10);
-      } else {
-        d3.select(this).attr("r", 5); // Återställer nodens storlek när den inte är markerad
-      }
-    });
-    nodes2.each(function (d) {
-      if (d.index === selectedNode.index) {
-        d3.select(this).attr("stroke", "yellow").attr("r", 10);
-      } else {
-        d3.select(this).attr("r", 5); // Återställer nodens storlek när den inte är markerad
-      }
-    });
-  }
+  // Dropdown menu for dataset2
+  const dataset2Select = document.getElementById("dataset2");
+  dataset2Select.addEventListener("change", function () {
+    const selectedDataset = this.value;
+    loadData(selectedDataset, svg2, tooltipContainer2, weightThreshold2);
+  });
 
   // Slider 1
   const weightSlider1 = document.getElementById("weightSlider1");
   const weightValue1 = document.getElementById("weightValue1");
-  weightValue1.textContent = weightSlider1.value; // Set initial value
+  weightValue1.textContent = weightSlider1.value;
 
   weightSlider1.addEventListener("input", function () {
     weightThreshold1 = +this.value;
     weightValue1.textContent = weightThreshold1;
-    svg1.selectAll("*").remove(); // Clear the visualization
+    svg1.selectAll("*").remove();
     displayGraph(
       svg1,
       data.nodes,
       data.links,
       tooltipContainer1,
       weightThreshold1
-    ); // Redraw with new threshold
+    );
   });
 
   // Slider 2
   const weightSlider2 = document.getElementById("weightSlider2");
   const weightValue2 = document.getElementById("weightValue2");
-  weightValue2.textContent = weightSlider2.value; // Set initial value
+  weightValue2.textContent = weightSlider2.value;
 
   weightSlider2.addEventListener("input", function () {
     weightThreshold2 = +this.value;
     weightValue2.textContent = weightThreshold2;
-    svg2.selectAll("*").remove(); // Clear the visualization
+    svg2.selectAll("*").remove();
     displayGraph(
       svg2,
       data.nodes,
       data.links,
       tooltipContainer2,
       weightThreshold2
-    ); // Redraw with new threshold
+    );
   });
-});
+  // Function for brushing
+  function brushLink(selectedNode) {
+    const nodes1 = svg1.selectAll("circle");
+    const nodes2 = svg2.selectAll("circle");
 
-function showNodeDetails(event, node, tooltipContainer) {
-  // Extract necessary information from the node
-  let characterName = node.name;
-  let numberOfScenes = node.value;
+    // Check if the selected node is already highlighted
+    const isHighlighted =
+      nodes1.filter((d) => d.name === selectedNode.name).attr("stroke") ===
+      "yellow";
 
-  // Determine which SVG container triggered the event
-  const svgId = event.target.closest("svg").id;
+    // Clear existing selections
+    nodes1.attr("stroke", null);
+    nodes2.attr("stroke", null);
 
-  // Construct tooltip content
-  let tooltipContent = `Character: ${characterName}<br>Number of Scenes: ${numberOfScenes}`;
+    // If the selected node is not already highlighted, highlight it
+    // Otherwise, remove the highlighting
+    if (!isHighlighted) {
+      // Highlight selected node in both diagrams based on character name
+      nodes1.each(function (d) {
+        if (d.name === selectedNode.name) {
+          d3.select(this).attr("stroke", "yellow").attr("r", 10);
+        } else {
+          d3.select(this).attr("r", 5); // Reset node size when not selected
+        }
+      });
 
-  // Display tooltip
-  displayTooltip(tooltipContent, event.pageX, event.pageY, tooltipContainer);
-}
-
-function resetNode(event, tooltipContainer) {
-  const currentSvg = d3.select(event.target.closest("svg"));
-  const isHoveringSameSvg = currentSvg.node() === event.currentTarget;
-  if (!isHoveringSameSvg) {
-    hideTooltip(tooltipContainer);
+      // Find the corresponding node in svg2 and highlight it based on character name
+      const correspondingNode = nodes2.filter(
+        (d) => d.name === selectedNode.name
+      );
+      correspondingNode.attr("stroke", "yellow").attr("r", 10);
+    } else {
+      // Reset node size when unselected
+      nodes1.attr("r", 5);
+      nodes2.attr("r", 5);
+    }
   }
-}
-
-function displayTooltip(content, x, y, tooltipContainer) {
-  // Display tooltip with provided content
-  // Update the content of the specified tooltip container
-  tooltipContainer.innerHTML = content;
-  // Adjust the position of the tooltip
-  tooltipContainer.style.left = x + "px";
-  tooltipContainer.style.top = y + "px";
-  // Show the tooltip
-  tooltipContainer.style.visibility = "visible";
-}
-
-function hideTooltip(tooltipContainer) {
-  // Hide tooltip
-  tooltipContainer.style.visibility = "hidden";
-}
+  // Function for details-on-demand
+  function showNodeDetails(event, node, tooltipContainer) {
+    let characterName = node.name;
+    let numberOfScenes = node.value;
+    let tooltipContent = `Character: ${characterName}<br>Number of Scenes: ${numberOfScenes}`;
+    displayTooltip(tooltipContent, event.pageX, event.pageY, tooltipContainer);
+  }
+  // Function to reset node
+  function resetNode(event, tooltipContainer) {
+    const currentSvg = d3.select(event.target.closest("svg"));
+    const isHoveringSameSvg = currentSvg.node() === event.currentTarget;
+    if (!isHoveringSameSvg) {
+      hideTooltip(tooltipContainer);
+    }
+  }
+  // Function to display tooltip
+  function displayTooltip(content, x, y, tooltipContainer) {
+    tooltipContainer.innerHTML = content;
+    tooltipContainer.style.left = x + "px";
+    tooltipContainer.style.top = y + "px";
+    tooltipContainer.style.visibility = "visible";
+  }
+  // Function to hide the tooltip
+  function hideTooltip(tooltipContainer) {
+    tooltipContainer.style.visibility = "hidden";
+  }
+});

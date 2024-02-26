@@ -1,3 +1,4 @@
+
 .container {
   text-align: center;
   color: blueviolet;
@@ -6,14 +7,14 @@
 .all {
   display: flex;
   justify-content: center;
-  align-items: flex-start; /* if you want the tops of the panels and diagrams aligned */
+  align-items: flex-start; 
 }
 
 .panel1, .panel2 {
   width: 200px;
   border: 1px solid black;
   border-radius: 5px;
-  margin: 10px; /* Adjust as necessary for spacing */
+  margin: 10px; 
 }
 
 .diagrams-container {
@@ -21,8 +22,8 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  margin: 10px; /* Adjust as necessary for spacing */
-  border: 1px solid black;
+  /*margin: 10px; 
+  border: 1px solid black;*/
   border-radius: 5px;
 }
 
@@ -30,8 +31,8 @@
 .details1, .details2, .control-panel1, .control-panel2 {
   margin: 20px;
   padding: 10px;
-  border: 1px solid black;
-  border-radius: 5px;
+  /*border: 1px solid black;
+  border-radius: 5px;*/
   height: 120px;
 
 }
@@ -42,7 +43,7 @@
   color: white;
   padding: 5px;
   border-radius: 5px;
-  pointer-events: none; /* Ensures the tooltip doesn't interfere with mouse events */
-  z-index: 10; /* Ensure tooltips appear above other elements */
-  visibility: hidden; /* Initially hidden */
+  pointer-events: none; 
+  z-index: 10; 
+  visibility: hidden; 
 }
