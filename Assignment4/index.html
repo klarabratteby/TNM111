@@ -14,7 +14,6 @@
           <div class="tooltip1"></div>
         <div class="control-panel1">
           <label for="weightSlider1">Filter by Edge Weight:</label>
-          <input type="range" id="weightSlider1" min="1" max="30" value="1">
           <span id="weightValue1">1</span>
           <label for="dataset1">What dataset?:</label> 
           <select id="dataset1"> 
@@ -26,13 +25,24 @@
             <option value="starwars-interactions/starwars-episode-6-interactions-allCharacters.json">Star Wars Episode 6</option>
             <option value="starwars-interactions/starwars-episode-7-interactions-allCharacters.json">Star Wars Episode 7</option>
             <option value="starwars-interactions/starwars-full-interactions-allCharacters.json">Star Wars Full Interactions</option>
+          <input type="range" id="weightSlider1" min="1" max="30" value="1">
+          <label for="dataset1">What dataset?:</label> <!-- Changed ID to dataset1 -->
+          <select id="dataset1"> <!-- Changed ID to dataset1 -->
+            <option value="starwars-episode-1-interactions-allCharacters.json">Star Wars Episode 1</option>
+            <option value="starwars-episode-2-interactions-allCharacters.json">Star Wars Episode 2</option>
+            <option value="starwars-episode-3-interactions-allCharacters.json">Star Wars Episode 3</option>
+            <option value="starwars-episode-4-interactions-allCharacters.json">Star Wars Episode 4</option>
+            <option value="starwars-episode-5-interactions-allCharacters.json">Star Wars Episode 5</option>
+            <option value="starwars-episode-6-interactions-allCharacters.json">Star Wars Episode 6</option>
+            <option value="starwars-episode-7-interactions-allCharacters.json">Star Wars Episode 7</option>
+            <option value="starwars-full-interactions-allCharacters.json">Star Wars Full Interactions</option>
           </select>
         
         </div>
       </div>
       <div class="diagrams-container">
-        <svg id="diagram1" width="400" height="400"></svg>
-        <svg id="diagram2" width="400" height="400"></svg>
+        <svg id="diagram1" width="500" height="500"></svg>
+        <svg id="diagram2" width="500" height="500"></svg>
       </div>
       <div class="panel2">
        
@@ -41,8 +51,8 @@
         <div class="control-panel2">
           
           <label for="weightSlider2">Filter by Edge Weight:</label>
-          <input type="range" id="weightSlider2" min="1" max="30" value="1">
           <span id="weightValue2">1</span>
+          <input type="range" id="weightSlider2" min="1" max="30" value="1">
           <label for="dataset2">What dataset?</label>
           <select id="dataset2">
             <option value="starwars-interactions/starwars-episode-1-interactions-allCharacters.json">Star Wars Episode 1</option>
