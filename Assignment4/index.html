@@ -8,15 +8,21 @@
 </head>
 <body>
   <div class="container">
+    <div class="headline">
     <h1>Star Wars Control System</h1>
-    <div class="all">
+    </div>
+    <div class="all-elements">
       <div class="panel1">
           <div class="tooltip1"></div>
         <div class="control-panel1">
+          <div class="filter-container1">
           <label for="weightSlider1">Filter by Edge Weight:</label>
           <span id="weightValue1">1</span>
-          <label for="dataset1">What dataset?:</label> 
+          <input type="range" id="weightSlider1" min="1" max="30" value="1">
+          </div>
+          <label for="dataset1">Select dataset</label> 
           <select id="dataset1"> 
+            <option value="starwars-interactions/starwars-full-interactions-allCharacters.json">Star Wars Full Interactions</option>
             <option value="starwars-interactions/starwars-episode-1-interactions-allCharacters.json">Star Wars Episode 1</option>
             <option value="starwars-interactions/starwars-episode-2-interactions-allCharacters.json">Star Wars Episode 2</option>
             <option value="starwars-interactions/starwars-episode-3-interactions-allCharacters.json">Star Wars Episode 3</option>
@@ -24,18 +30,6 @@
             <option value="starwars-interactions/starwars-episode-5-interactions-allCharacters.json">Star Wars Episode 5</option>
             <option value="starwars-interactions/starwars-episode-6-interactions-allCharacters.json">Star Wars Episode 6</option>
             <option value="starwars-interactions/starwars-episode-7-interactions-allCharacters.json">Star Wars Episode 7</option>
-            <option value="starwars-interactions/starwars-full-interactions-allCharacters.json">Star Wars Full Interactions</option>
-          <input type="range" id="weightSlider1" min="1" max="30" value="1">
-          <label for="dataset1">What dataset?:</label> <!-- Changed ID to dataset1 -->
-          <select id="dataset1"> <!-- Changed ID to dataset1 -->
-            <option value="starwars-episode-1-interactions-allCharacters.json">Star Wars Episode 1</option>
-            <option value="starwars-episode-2-interactions-allCharacters.json">Star Wars Episode 2</option>
-            <option value="starwars-episode-3-interactions-allCharacters.json">Star Wars Episode 3</option>
-            <option value="starwars-episode-4-interactions-allCharacters.json">Star Wars Episode 4</option>
-            <option value="starwars-episode-5-interactions-allCharacters.json">Star Wars Episode 5</option>
-            <option value="starwars-episode-6-interactions-allCharacters.json">Star Wars Episode 6</option>
-            <option value="starwars-episode-7-interactions-allCharacters.json">Star Wars Episode 7</option>
-            <option value="starwars-full-interactions-allCharacters.json">Star Wars Full Interactions</option>
           </select>
         
         </div>
@@ -49,12 +43,14 @@
         <div class="tooltip2"></div>
         
         <div class="control-panel2">
-          
+          <div class="filter-container2">
           <label for="weightSlider2">Filter by Edge Weight:</label>
           <span id="weightValue2">1</span>
           <input type="range" id="weightSlider2" min="1" max="30" value="1">
-          <label for="dataset2">What dataset?</label>
+          </div>
+          <label for="dataset2">Select dataset</label>
           <select id="dataset2">
+            <option value="starwars-interactions/starwars-full-interactions-allCharacters.json">Star Wars Full Interactions</option>
             <option value="starwars-interactions/starwars-episode-1-interactions-allCharacters.json">Star Wars Episode 1</option>
             <option value="starwars-interactions/starwars-episode-2-interactions-allCharacters.json">Star Wars Episode 2</option>
             <option value="starwars-interactions/starwars-episode-3-interactions-allCharacters.json">Star Wars Episode 3</option>
@@ -62,13 +58,12 @@
             <option value="starwars-interactions/starwars-episode-5-interactions-allCharacters.json">Star Wars Episode 5</option>
             <option value="starwars-interactions/starwars-episode-6-interactions-allCharacters.json">Star Wars Episode 6</option>
             <option value="starwars-interactions/starwars-episode-7-interactions-allCharacters.json">Star Wars Episode 7</option>
-            <option value="starwars-interactions/starwars-full-interactions-allCharacters.json">Star Wars Full Interactions</option>
           </select>
         </div>
       </div>
     </div>  
   </div>
   <script src="https://d3js.org/d3.v7.min.js"></script>
-  <script src="./test.js" defer></script>
+  <script src="./index.js" defer></script>
 </body>
 </html>

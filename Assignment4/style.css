@@ -2,16 +2,24 @@
 .container {
   text-align: center;
   color: black;
+  margin-top:5%;
+
+}
+.headline {
+  font-size: 30px;
+  text-decoration: underline;
 }
 
-.all {
+.all-elements {
   display: flex;
   justify-content: center;
   align-items: flex-start; 
+  margin-top:10%;
 }
 
 .panel1, .panel2 {
-  width: 200px;
+  width: 15%;
+  max-width: 500px;
   border: 1px solid black;
   border-radius: 5px;
   margin: 10px; 
@@ -20,21 +28,24 @@
 .diagrams-container {
   display: flex;
   flex-direction: row;
-  justify-content: center;
   align-items: center;
-  /*margin: 10px; 
-  border: 1px solid black;*/
   border-radius: 5px;
+}
+
+.diagrams-container svg {
+  margin: 0 20px; 
 }
 
 
 .details1, .details2, .control-panel1, .control-panel2 {
-  margin: 20px;
+  margin: 20px auto;
   padding: 10px;
-  /*border: 1px solid black;
-  border-radius: 5px;*/
   height: 120px;
+  text-align: center; 
 
+}
+.filter-container1,.filter-container2 {
+  margin-bottom: 10px;
 }
 .tooltip1,
 .tooltip2 {
@@ -46,4 +57,8 @@
   pointer-events: none; 
   z-index: 10; 
   visibility: hidden; 
+}
+
+#dataset1, #dataset2 {
+  margin-top: 10px; 
 }
