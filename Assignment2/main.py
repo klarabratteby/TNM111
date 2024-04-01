@@ -241,6 +241,7 @@ if __name__ == "__main__":
         "Enter the CSV file path: ")
     data = read_data(file_path)
 
+
     # Create the Tkinter window
     root = tk.Tk()
     root.title("Scatter Plot")

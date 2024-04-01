@@ -254,15 +254,6 @@ document.addEventListener("DOMContentLoaded", function () {
     displayTooltip(tooltipContent, event.pageX, event.pageY, tooltipContainer);
   }
 
-  // Function to reset node
-  function resetNode(event, tooltipContainer) {
-    const currentSvg = d3.select(event.target.closest("svg"));
-    const isHoveringSameSvg = currentSvg.node() === event.currentTarget;
-    if (!isHoveringSameSvg) {
-      hideTooltip(tooltipContainer);
-    }
-  }
-
   // Function to display tooltip
   function displayTooltip(content, x, y, tooltipContainer) {
     tooltipContainer.innerHTML = content;
